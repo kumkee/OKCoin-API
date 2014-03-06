@@ -1,18 +1,22 @@
+# OKCoin api
+# https://www.okcoin.com/t-1000097.html
+# https://www.okcoin.com/t-1000052.html
+
 import urllib
 import urllib2
 import hashlib
 import simplejson
+from time import time
 
 class TickerObject(object):
 
     def __init__(self,data):
-        self.bid = data['ticker']['buy']
-        self.ask = data['ticker']['sell']
-        if( 'high' in data ):
-            self.high = data['ticker']['high']
-            self.low = data['ticker']['low']
-            self.last = data['ticker']['last']
-            self.volume = data['ticker']['volume']
+        self.bid = float(data['ticker']['buy'])
+        self.ask = float(data['ticker']['sell'])
+        self.high = float(data['ticker']['high'])
+        self.low = float(data['ticker']['low'])
+        self.last = float(data['ticker']['last'])
+        self.volume = float(data['ticker']['vol'])
 
 class DepthObject(object):
 
@@ -31,7 +35,7 @@ class MarketData(object):
         data = simplejson.load(response)
         return(data)
         
-    def ticker(self, symbol):
+    def ticker(self, symbol='btc_cny'):
         btc_ticker_url = 'https://www.okcoin.com/api/ticker.do?symbol=btc_cny'
         ltc_ticker_url = 'https://www.okcoin.com/api/ticker.do?symbol=ltc_cny'
         if( symbol == 'btc_cny' ):
@@ -50,7 +54,7 @@ class MarketData(object):
         else:
             print('Unrecognized symbol: ' + symbol)
 
-    def get_depth(self, symbol):
+    def get_depth(self, symbol='btc_cny'):
         btc_depth_url = 'https://www.okcoin.com/api/depth.do?symbol=btc_cny'
         ltc_depth_url = 'https://www.okcoin.com/api/depth.do?symbol=ltc_cny'
         if( symbol == 'btc_cny' ):
@@ -62,15 +66,48 @@ class MarketData(object):
         else:
             print('Unrecognized symbol: ' + symbol)
 
-    def get_history(self, symbol):
-        btc_history_url = 'https://www.okcoin.com/api/trades.do?symbol=btc_cny'
-        ltc_history_url = 'https://www.okcoin.com/api/trades.do?symbol=ltc_cny'
-        if( symbol == 'btc_cny' ):
-            return( self.get_json(btc_history_url) )
-        if( symbol == 'ltc_cny' ):
-            return( self.get_json(ltc_history_url) )
+    def get_history(self, symbol='btc_cny', since=None):
+        str_since = ('&since=' + str(since)) if isinstance(since,int) else ''
+        history_url = 'https://www.okcoin.com/api/trades.do?symbol='
+        if( symbol == 'btc_cny' or symbol == 'ltc_cny'):
+            return( self.get_json(history_url + symbol + str_since) )
         else:
             print('Unrecognized symbol: ' + symbol)
+
+    def get_closingtrades(self, n, N, symbol='btc_cny'):
+        clstrades = [None] * N
+    
+        timemark = int( time() )
+        i = 0
+        passtrade = self.get_history(symbol=symbol)
+        oldesttid = passtrade[0]['tid']
+
+        for j in range(0, N):
+            #print 'timemark =', timemark ####debug
+            #print ' j =', j ####debug
+            while True:
+                i -= 1
+
+                if i < -len(passtrade):
+                    passtrade = self.get_history(symbol=symbol, since = oldesttid - int( len(passtrade)*1.9 ) );
+                    newotid = passtrade[0]['tid']
+                    while oldesttid > passtrade[-1]['tid']:
+                        passtrade = self.get_history(symbol=symbol, since = newotid +2 )
+                        newotid = passtrade[0]['tid']
+                    oldesttid = newotid
+                    i = -1
+                #print ' i =', i ####debug
+
+                if timemark - passtrade[i]['date'] > 0 and timemark - passtrade[i]['date'] <= n:
+                    clstrades[j] = passtrade[i]
+                    timemark -= n
+                    break
+                elif timemark - passtrade[i]['date'] > n:
+                    i += 1
+                    timemark -= n
+                    break
+
+        return clstrades
 
 class TradeAPI(object):
     
@@ -117,7 +154,7 @@ class TradeAPI(object):
         user_info_url = 'https://www.okcoin.com/api/userinfo.do'
         return(self._post(params, user_info_url))
 
-    def trade(self, symbol, trade_type, rate, amount):
+    def trade(self, trade_type, rate, amount, symbol='btc_cny'):
         params = { 'partner' : self.partner,
                    'symbol' : symbol,
                    'type' : trade_type,
@@ -156,13 +193,3 @@ class TradeAPI(object):
                   10012 : 'Unsupported symbol (not btc_cny or ltc_cny)',
                   10013 : 'This interface only accepts https requests' }
         return( codes[error_code] )
-                   
-                   
-                   
-                   
-                  
-        
-            
-            
-            
-            
