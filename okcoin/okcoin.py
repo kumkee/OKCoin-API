@@ -67,7 +67,7 @@ class MarketData(object):
             print('Unrecognized symbol: ' + symbol)
 
     def get_history(self, symbol='btc_cny', since=None):
-        str_since = ('&since=' + str(since)) if isinstance(since,int) else ''
+        str_since = ('&since=' + str(since)) if isinstance(since,long) else ''
         history_url = 'https://www.okcoin.com/api/trades.do?symbol='
         if( symbol == 'btc_cny' or symbol == 'ltc_cny'):
             return( self.get_json(history_url + symbol + str_since) )

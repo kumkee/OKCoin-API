@@ -1,6 +1,7 @@
 import okcoin
 from time import sleep
 import sys
+import logging
 
 imax = 30
 
@@ -28,7 +29,9 @@ def checkh(h,k,t):
 
 def regfalsi_h(s0, s1, k, t, M):
     #M = okcoin.MarketData()
+    logging.info('regfalsi_h: getting init market data since= %d' % s1)
     h1 = M.get_history(since = s1)
+    logging.info('regfalsi_h: getting init market data since= %d' % s0)
     h0 = M.get_history(since = s0)
     h = h1
 
@@ -43,15 +46,16 @@ def regfalsi_h(s0, s1, k, t, M):
     while not checkh(h,k,t):
         i += 1
         s = ( a * fb - b * fa ) / ( fb - fa ) - 2*k
+    	logging.info('regfalsi_h: getting market data since= %d' % s)
         h = M.get_history(since = s)
-        #print " i = %d"%i; i += 1 ####debug
+        logging.debug(" i = %d"%i);# i += 1 ####debug
         #print " s = %d"%s####debug
         #print " t0 = %d"% htime(h, 0)####debug
         #print " tn = %d"% htime(h, -1)####debug
         fs0 = htime(h, k-1) - t
         fs1 = htime(h, -1) - t
         if i > imax:
-            sys.exit(2)
+            raise Exception('regfalsi_h: diverges')#sys.exit(2)
         if fs1 * fb > 0:
             if side == -1:
                 fa /= 2
@@ -120,12 +124,14 @@ def secant(h,k,t):
 
 
 def time2tid(t, k = 3, start_s = 1, term_s = -1, market=okcoin.MarketData()):
-    t = int(t)
+    t = long(t)
 
     #label = 'timedelta'
     #print 't = {0:d}'.format(t)####debug
 
-    h = regfalsi_h(start_s, term_s, k, t, market)
+    logging.debug('About to enter regfalsi_h') ###debug
+    h = regfalsi_h(long(start_s), long(term_s), k, t, market)
+    logging.debug('regfalsi_h done') ###debug
 
     z = regfalsi(h,t)
 
