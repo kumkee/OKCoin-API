@@ -3,10 +3,10 @@ from okcoin.utiltime import utc2local
 from okcoin.utiltime import datetime2unixtime
 from okcoin.utiltime import unixtime2localtime
 from datetime import datetime, timedelta
-import logging
+#import logging
 
 def main():
-   logging.basicConfig(filename='time2tid_test.log', level=logging.DEBUG)
+   #logging.basicConfig(filename='time2tid_test.log', level=logging.DEBUG)
 
    my_dt = datetime(2014, 10, 31, 15, 30)
 
@@ -17,9 +17,9 @@ def main():
    print
    print "Target time:", utc2local(my_dt).strftime(timeformat)
 
-   logging.info('Entering time2tid')
+   #logging.info('Entering time2tid')
    lst_trades = time2tid( datetime2unixtime(my_dt) )
-   logging.info('Done time2tid')
+   #logging.info('Done time2tid')
 
    print "Closing prices:"
 
