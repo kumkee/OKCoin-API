@@ -19,7 +19,7 @@ def store_trades(raw):
 def main():
  
    dt_start = datetime(2014, 3, 2, 12)
-   dt_final = datetime(2014, 3, 2, 16)
+   dt_final = datetime(2014, 3, 4, 12)
 
    td = timedelta(hours=1)
 
