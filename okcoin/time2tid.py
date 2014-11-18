@@ -123,7 +123,7 @@ def secant(h,k,t):
     return (htid(h,0) * f1 - htid(h,-1) * f0) / (f1 - f0) - 2# - 2*k -1
 
 
-def time2tid(t, k = 3, start_s = 1, term_s = -1, market=okcoin.MarketData()):
+def time2tid(t, k = 3, start_s = 0, term_s = -1, market=okcoin.MarketData()):
     t = long(t)
 
     #label = 'timedelta'
