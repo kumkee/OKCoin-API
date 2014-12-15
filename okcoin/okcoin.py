@@ -5,7 +5,7 @@
 import urllib
 import urllib2
 import hashlib
-import simplejson
+import json as simplejson
 from time import time
 
 class TickerObject(object):

@@ -13,7 +13,7 @@ def store_trades(raw):
       s += ' ' + trade['price']
       s += ';\t'
 
-   print s
+   print(s)
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
       store_trades(g)
 
    print
-   print "Time consumed:", datetime.today() - t
+   print("Time consumed:", datetime.today() - t)
 
    return 0
 
